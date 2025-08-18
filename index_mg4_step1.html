@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MindGrid • شبكة العقول</title>
+  <base href="/Mindgrid/">
+  <link rel="stylesheet" href="styles.css?v=mg4_step1">
+  <style>
+    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,"Noto Naskh Arabic",sans-serif;background:#f6fbff;margin:0}
+    .container{max-width:1000px;margin:0 auto;padding:16px}
+    .toolbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;background:#fff;border-bottom:1px solid #e9eef3;padding:12px 16px}
+    .brand{font-weight:800;font-size:20px}
+    .btn{appearance:none;border:1px solid #d0d7de;border-radius:10px;background:#fff;padding:8px 12px;cursor:pointer}
+    .screen{display:none}
+    .card{background:#fff;border:1px solid #e9eef3;border-radius:14px;padding:14px;margin:14px 0}
+    .muted{opacity:.75}
+    #metroWrap{position:relative;height:440px;background:#f7f9fb;border-radius:16px;overflow:hidden;margin-bottom:14px}
+    #metroSVG{position:absolute;inset:0}
+    #metroInputs{position:absolute;inset:0}
+    .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:12px;opacity:0;transition:.25s}
+    .toast.on{opacity:1}
+  </style>
+</head>
+<body>
+  <header class="toolbar">
+    <button id="btnBack" class="btn" title="رجوع">رجوع</button>
+    <button class="btn" onclick="location.href='/Mindgrid/?v=mg4_step1&cb='+Date.now()">تحديث</button>
+    <div class="brand">🧠 MindGrid</div>
+    <div style="margin-inline-start:auto" class="muted">إصدار الإعداد: mg4_step1</div>
+  </header>
+
+  <main class="container">
+    <section id="scrHome" class="screen" style="display:block">
+      <h2>القائمة الرئيسية</h2>
+      <div class="card">سيتم ملء الأقسام (المترو والمصغّرات) بعد رفع الملفات في الخطوات التالية.</div>
+      <div id="homeSections" class="stack"></div>
+    </section>
+
+    <section id="scrPack" class="screen">
+      <h2 id="packTitle">—</h2>
+      <div id="packDesc" class="muted">—</div>
+      <div id="levelsGrid"></div>
+    </section>
+
+    <section id="scrMetro" class="screen">
+      <h2 id="playTitle">🚇 خريطة المترو</h2>
+      <div id="metroWrap" class="card">
+        <svg id="metroSVG" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+        <div id="metroInputs"></div>
+      </div>
+      <div class="card">
+        <div id="mClueMeta" style="font-weight:700;margin-bottom:6px">—</div>
+        <div id="mClueText" class="muted" style="margin-bottom:10px">—</div>
+        <div id="mClueList" class="cw-strip"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="btnRevealLetter" class="btn" disabled>كشف حرف</button>
+          <button id="btnRevealWord" class="btn" disabled>كشف الإجابة</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="scrMini" class="screen">
+      <h2>⚡ المصغّرات السريعة</h2>
+      <div id="miniHud" class="muted">—</div>
+      <div id="miniGrid" class="card">—</div>
+      <div id="miniClues" class="card">—</div>
+      <div style="display:flex;gap:8px">
+        <button id="miniRevealLetter" class="btn" disabled>كشف حرف</button>
+        <button id="miniRevealWord" class="btn" disabled>كشف الإجابة</button>
+      </div>
+    </section>
+
+    <div id="toast" class="toast"></div>
+  </main>
+
+  <script src="js/metro.js?v=mg4_step1"></script>
+  <script src="js/mini.js?v=mg4_step1"></script>
+  <script type="module" src="js/library.js?v=mg4_step1"></script>
+  <script>
+    document.getElementById('btnBack').addEventListener('click', ()=> {
+      document.querySelectorAll('.screen').forEach(s=> s.style.display='none');
+      const home = document.getElementById('scrHome'); if(home) home.style.display='block';
+    });
+  </script>
+  <noscript>الرجاء تفعيل JavaScript لتعمل اللعبة.</noscript>
+</body>
+</html>
