@@ -1,18 +1,44 @@
-/* MG_Ladder — Ladder mode stub to verify button works */
-(function(){
-  'use strict';
-  const api = window.MG_Ladder || (window.MG_Ladder={});
-  api.start = function(){
-    const root = document.getElementById('ladder') || document.body;
-    root.innerHTML = `
-      <h2>السُّلَّم 🪜</h2>
-      <div style="height:220px;border-radius:12px;background:#ecfeff;display:flex;align-items:center;justify-content:center;margin:12px 0">
-        <div style="text-align:center">
-          <div style="font-size:38px">🪜</div>
-          <div>تم تشغيل وضع السُّلَّم التجريبي — سنضيف التفاعل بعد التأكد أن الأزرار تعمل.</div>
-        </div>
+/* js/ladder.js  — نسخة تمهيدية تُعرّف MG.openLadder حتى يعمل الزر */
+
+(function () {
+  // أنشئ الـ namespace إن لم يكن موجودًا
+  window.MG = window.MG || {};
+
+  // أداة بسيطة لعرض شاشة داخل الصفحة
+  function showScreen(innerHTML) {
+    let host = document.getElementById('mg-screen');
+    if (!host) {
+      host = document.createElement('div');
+      host.id = 'mg-screen';
+      host.style.maxWidth = '840px';
+      host.style.margin = '24px auto';
+      host.style.padding = '0 16px';
+      document.body.appendChild(host);
+    }
+    host.innerHTML = innerHTML;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // زر رجوع موحّد
+  function backButton() {
+    return '<button class="btn" id="mg-back">رجوع</button>';
+  }
+
+  // === الدالة المطلوبة ===
+  MG.openLadder = function () {
+    // نسخة تجريبية: شاشة بسيطة تؤكد أن النمط يعمل
+    showScreen(`
+      <div class="card">
+        <h2 style="margin:0 0 8px">السُّلَّم 🪜</h2>
+        <p class="muted" style="margin-top:0">
+          النسخة التمهيدية تعمل. سنربط حزم المحتوى لاحقًا (levels/packs) ونفعّل اللعب الفعلي.
+        </p>
+        ${backButton()}
       </div>
-      <button type="button" onclick="location.reload()">رجوع</button>
-    `;
+    `);
+
+    // رجوع: نعيد تحميل الصفحة للعودة للقائمة
+    const back = document.getElementById('mg-back');
+    if (back) back.onclick = () => location.reload();
   };
 })();
