@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>MindGrid</title>
+
+  <!-- كسر كاش بسيط للـ CSS -->
+  <script>
+    (function () {
+      const usp = new URLSearchParams(location.search);
+      const v = usp.get('v') || 'mg_repub';
+      const cb = usp.get('cb') || Date.now().toString().slice(-6);
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = `styles.css?v=${encodeURIComponent(v)}&cb=${cb}`;
+      document.write(link.outerHTML);
+      // اجعل القيم متاحة لباقي الصفحة
+      window.__MG_VER__ = v; window.__MG_CB__ = cb;
+    })();
+  </script>
+
+  <style>
+    /* لمسات خفيفة في حال لم يُحمّل styles.css */
+    :root{--bg:#f6fbff;--card:#ffffff;--txt:#0f172a;--muted:#64748b;--brand:#0ea5e9;--ok:#10b981;--warn:#f59e0b}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Kufi Arabic","Noto Naskh Arabic",Tahoma,sans-serif;color:var(--txt)}
+    header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#fff;box-shadow:0 1px 8px rgba(0,0,0,.06);position:sticky;top:0;z-index:5}
+    header .title{font-weight:800;letter-spacing:.3px}
+    header .badge{font-size:12px;color:var(--muted)}
+    main{max-width:900px;margin:20px auto;padding:0 14px}
+    .card{background:var(--card);border-radius:14px;padding:18px;box-shadow:0 6px 24px rgba(2,6,23,.06);margin-bottom:16px}
+    .row{display:flex;gap:14px;flex-wrap:wrap}
+    .btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer}
+    .btn.secondary{background:#e2e8f0;color:#0f172a}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    .title-lg{font-size:22px;font-weight:800;margin:0 0 6px}
+    .muted{color:var(--muted);font-size:14px}
+    .hidden{display:none !important}
+    .note{padding:10px 12px;border-radius:10px;background:#f8fafc;border:1px dashed #cbd5e1;color:var(--muted);font-size:14px}
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="title">🧠 MindGrid</div>
+    <div class="badge" id="verBadge">—</div>
+  </header>
+
+  <main id="app">
+    <section class="card">
+      <h2 class="title-lg">القائمة الرئيسية</h2>
+      <p class="muted">اختر نمط الكلمات المتقاطعة.</p>
+    </section>
+
+    <section class="card">
+      <div class="row">
+        <div style="flex:1 1 280px">
+          <h3 class="title-lg">الحلقات المتداخلة ⭕</h3>
+          <p class="muted">أقواس دائرية تتقاطع — تجربة مختلفة ومريحة للعين.</p>
+          <div class="row">
+            <button class="btn" id="startOrbit">ابدأ</button>
+            <button class="btn secondary" id="checkOrbit">تحقّق من الحزمة</button>
+          </div>
+          <div class="note hidden" id="orbitNote"></div>
+        </div>
+
+        <div style="flex:1 1 280px">
+          <h3 class="title-lg">السُّلَّم 🪜</h3>
+          <p class="muted">أعمدة كلمات تربطها درجات — انتقال سريع على الموبايل.</p>
+          <div class="row">
+            <button class="btn" id="startLadder">ابدأ</button>
+            <button class="btn secondary" id="checkLadder">تحقّق من الحزمة</button>
+          </div>
+          <div class="note hidden" id="ladderNote"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="muted">نصيحة: إذا واجهت 404، تأكّد من وجود الملفات في:
+        <code>Content/orbit/packs/starter.json</code> و
+        <code>js/orbit.js</code>،
+        <code>js/ladder.js</code>.
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // أدوات عامة
+    function cacheBust(url) {
+      const v = encodeURIComponent(window.__MG_VER__ || 'mg_repub');
+      const cb = encodeURIComponent(window.__MG_CB__ || Date.now());
+      const sep = url.includes('?') ? '&' : '?';
+      return `${url}${sep}v=${v}&cb=${cb}`;
+    }
+    function loadScript(src) {
+      return new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = cacheBust(src); s.defer = true; s.onload = res; s.onerror = () => rej(new Error('SCRIPT_404 ' + src));
+        document.head.appendChild(s);
+      });
+    }
+    function setNote(id, msg, ok) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      el.style.borderColor = ok ? 'var(--ok)' : '#cbd5e1';
+      el.style.color = ok ? '#065f46' : 'var(--muted)';
+      el.style.background = ok ? '#ecfdf5' : '#f8fafc';
+    }
+    function hideNote(id){ document.getElementById(id).classList.add('hidden'); }
+
+    // شارة الإصدار
+    document.getElementById('verBadge').textContent = `إصدار الإعداد: ${window.__MG_VER__} · cb=${window.__MG_CB__}`;
+
+    // تحقق من الحِزم
+    async function checkJSON(path) {
+      const r = await fetch(cacheBust(path), { cache: 'no-store' });
+      if (!r.ok) throw new Error('HTTP_' + r.status);
+      return r.json();
+    }
+
+    // أزرار الفحص
+    document.getElementById('checkOrbit').onclick = async () => {
+      hideNote('orbitNote');
+      try {
+        const data = await checkJSON('Content/orbit/packs/starter.json');
+        setNote('orbitNote', `تم العثور على الحزمة ✔ (${(data?.puzzles||[]).length || '؟'} لغز)`, true);
+      } catch (e) {
+        setNote('orbitNote', 'تعذّر العثور على الحزمة. أنشئ الملف: Content/orbit/packs/starter.json', false);
+      }
+    };
+    document.getElementById('checkLadder').onclick = async () => {
+      hideNote('ladderNote');
+      try {
+        const data = await checkJSON('Content/ladder/packs/starter.json');
+        setNote('ladderNote', `تم العثور على الحزمة ✔ (${(data?.puzzles||[]).length || '؟'} لغز)`, true);
+      } catch (e) {
+        setNote('ladderNote', 'تعذّر العثور على الحزمة. أنشئ الملف: Content/ladder/packs/starter.json', false);
+      }
+    };
+
+    // تشغيل الأنماط
+    async function startOrbit() {
+      hideNote('orbitNote');
+      try {
+        const [_, pack] = await Promise.all([
+          loadScript('js/orbit.js'),
+          checkJSON('Content/orbit/packs/starter.json')
+        ]);
+        if (window.MG_Orbit && typeof window.MG_Orbit.mount === 'function') {
+          window.MG_Orbit.mount(document.getElementById('app'), pack);
+        } else {
+          setNote('orbitNote', 'تم تحميل الحزمة لكن لم يتم العثور على MG_Orbit.mount داخل js/orbit.js', false);
+        }
+      } catch (e) {
+        setNote('orbitNote', 'تعذّر بدء النمط: ' + e.message, false);
+      }
+    }
+    async function startLadder() {
+      hideNote('ladderNote');
+      try {
+        const [_, pack] = await Promise.all([
+          loadScript('js/ladder.js'),
+          checkJSON('Content/ladder/packs/starter.json')
+        ]);
+        if (window.MG_Ladder && typeof window.MG_Ladder.mount === 'function') {
+          window.MG_Ladder.mount(document.getElementById('app'), pack);
+        } else {
+          setNote('ladderNote', 'تم تحميل الحزمة لكن لم يتم العثور على MG_Ladder.mount داخل js/ladder.js', false);
+        }
+      } catch (e) {
+        setNote('ladderNote', 'تعذّر بدء النمط: ' + e.message, false);
+      }
+    }
+
+    document.getElementById('startOrbit').onclick = startOrbit;
+    document.getElementById('startLadder').onclick = startLadder;
+
+    // تحميل مكتبة عامة إن وُجدت (اختياري)
+    loadScript('js/library.js').catch(()=>{ /* غير حرِج */ });
+  </script>
+</body>
+</html>
