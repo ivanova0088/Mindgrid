@@ -1,1 +1,125 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MindGrid – القائمة الرئيسية</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#f4f7fb;margin:0;color:#0b1620}
+    header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:14px 16px;background:#fff;border-bottom:1px solid #e7edf3;position:sticky;top:0}
+    header .tag{background:#e8f7ff;color:#056; padding:4px 8px;border-radius:8px;font-size:12px}
+    .wrap{max-width:840px;margin:24px auto;padding:0 16px}
+    .card{background:#fff;border:1px solid #e7edf3;border-radius:16px;padding:18px 16px;margin-bottom:16px;box-shadow:0 1px 0 rgba(0,0,0,.02)}
+    .title{font-size:28px;margin:8px 0 14px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .btn{background:#0aa3c2;color:#fff;border:none;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    .muted{color:#566b7f}
+    .warn{background:#fff4e5;border:1px solid #ffd9aa;color:#7a3e00;padding:10px 12px;border-radius:10px}
+    .ok{background:#e9fbf0;border:1px solid #c6f0d6;color:#095c2d;padding:10px 12px;border-radius:10px}
+    .danger{background:#ffecec;border:1px solid #ffc7c7;color:#7d0b0b;padding:10px 12px;border-radius:10px}
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display:flex;gap:10px;align-items:center">
+      <strong>MindGrid 🧠</strong>
+      <span class="tag" id="buildTag">mg_fix5</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" id="reload">تحديث</button>
+    </div>
+  </header>
 
+  <div class="wrap">
+    <div class="card">
+      <div class="title">القائمة الرئيسية</div>
+      <div id="status" class="warn">سيتم ملء الأقسام بعد تحميل السكربتات…</div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 8px">اختر النمط</h3>
+      <p class="muted" style="margin-top:0">نمطان جديدان: الحلقات المتداخلة (Orbit) والسُّلَّم (Ladder).</p>
+      <div class="row">
+        <div class="card" style="margin:0">
+          <h3 style="margin:0 0 6px">الحلقات المتداخلة</h3>
+          <p class="muted">أقواس دائرية تتقاطع مع أشعّة.</p>
+          <button id="go-orbit" class="btn">ابدأ</button>
+        </div>
+        <div class="card" style="margin:0">
+          <h3 style="margin:0 0 6px">السُّلَّم</h3>
+          <p class="muted">أعمدة كلمات تربطها درجات — مناسب للموبايل.</p>
+          <button id="go-ladder" class="btn">ابدأ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // كسر الكاش
+    const qs = new URLSearchParams(location.search);
+    const V = qs.get('v') || 'mg_fix5';
+    const CB = qs.get('cb') || String(Date.now()).slice(-6);
+    document.getElementById('buildTag').textContent = V;
+    document.getElementById('reload').onclick = () => {
+      const u = new URL(location.href);
+      u.searchParams.set('cb', Date.now());
+      location.href = u.toString();
+    };
+
+    const statusEl = document.getElementById('status');
+
+    function loadScript(src){
+      return new Promise((resolve, reject)=>{
+        const s = document.createElement('script');
+        s.src = `${src}?v=${encodeURIComponent(V)}&cb=${encodeURIComponent(CB)}`;
+        s.async = true;
+        s.onload = () => resolve(src);
+        s.onerror = () => reject(src);
+        document.head.appendChild(s);
+      });
+    }
+
+    (async function boot(){
+      try {
+        // حمّل المكتبة أولاً
+        await loadScript('./js/library.js');
+
+        // ثم الأنماط (لا مشكلة إن فشل أحدهما؛ سنعرض رسالة واضحة)
+        const results = await Promise.allSettled([
+          loadScript('./js/orbit.js'),
+          loadScript('./js/ladder.js')
+        ]);
+
+        const failed = results.filter(r => r.status === 'rejected').map(r => r.reason);
+        if (failed.length) {
+          statusEl.className = 'danger';
+          statusEl.innerHTML = 'تعذّر تحميل: <b>' + failed.join(', ') +
+            '</b> — تأكّد من المسار وحالة الأحرف (js/… و content/…).';
+        } else {
+          statusEl.className = 'ok';
+          statusEl.textContent = 'تم تحميل السكربتات بنجاح. يمكنك البدء الآن.';
+        }
+
+        // أربط الأزرار بالدوال إن وُجدت
+        const goOrbit  = document.getElementById('go-orbit');
+        const goLadder = document.getElementById('go-ladder');
+
+        goOrbit.onclick = () => {
+          if (window.MG && typeof MG.openOrbit === 'function') MG.openOrbit();
+          else alert('لم يتم تعريف MG.openOrbit — تأكّد من js/orbit.js وأنه يعرّف الدالة.');
+        };
+
+        goLadder.onclick = () => {
+          if (window.MG && typeof MG.openLadder === 'function') MG.openLadder();
+          else alert('لم يتم تعريف MG.openLadder — تأكّد من js/ladder.js وأنه يعرّف الدالة.');
+        };
+
+      } catch (e) {
+        statusEl.className = 'danger';
+        statusEl.innerHTML = 'تعذّر تحميل: <b>' + e + '</b>. المسار أو الاسم غير صحيح.';
+      }
+    })();
+  </script>
+</body>
+</html>
