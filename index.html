@@ -1,50 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-  <meta name="theme-color" content="#0bb3c9" />
-  <title>MindGrid</title>
-
-  <!-- الأسلوب العام -->
-  <link rel="stylesheet" href="styles.css?v=mg_fix3">
-
-  <!-- ضبط مسارات المحتوى (يُقرأ من داخل السكربتات) -->
-  <script>
-    window.MG_CONFIG = {
-      contentBase: "./content",
-      orbitPack:  "./content/orbit/packs/starter.json"
-    };
-  </script>
-
-  <!-- نحمل أنماط اللعب أولاً ثم مكتبة التحكم -->
-  <script defer src="js/orbit.js?v=mg_fix3"></script>
-  <script defer src="js/ladder.js?v=mg_fix3"></script>
-  <script defer src="js/library.js?v=mg_fix3"></script>
-</head>
-<body>
-  <header class="mg-topbar">
-    <div class="brand">
-      <span class="emoji">🧠</span>
-      <strong>MindGrid</strong>
-      <small class="ver">إصدار: mg_fix3</small>
-    </div>
-    <div class="actions">
-      <button type="button" onclick="location.reload()">تحديث</button>
-      <a class="btn" href="#" onclick="history.back();return false;">رجوع</a>
-    </div>
-  </header>
-
-  <main id="app" class="mg-container">
-    <!-- سيقوم library.js بملء الواجهة هنا -->
-    <section class="mg-card">
-      <h2>القائمة الرئيسية</h2>
-      <p>سيتم ملء الأقسام (الحلقات المتداخلة والسُلَّم) بعد تحميل السكربتات.</p>
-      <noscript>يجب تفعيل JavaScript.</noscript>
-    </section>
-  </main>
-
-  <!-- منطقة رسائل/حوارات عامة -->
-  <div id="mg-toast" class="mg-toast" hidden></div>
-</body>
-</html>
