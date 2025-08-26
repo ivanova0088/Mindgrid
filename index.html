@@ -2,83 +2,61 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-  <title>MindGrid • الكلمات المتقاطعة</title>
-  <meta name="theme-color" content="#0d1b2a" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MindGrid – الكلمات المتقاطعة</title>
+  <link rel="stylesheet" href="styles.css?v=mgcw_fixA">
   <style>
-    :root{--bg:#0e1624;--card:#132033;--text:#e6eef8;--muted:#8aa0b5;--accent:#57c5ff}
-    html,body{height:100%} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans Arabic",Tahoma}
-    .wrap{max-width:940px;margin:0 auto;padding:18px}
-    .bar{display:flex;gap:8px;align-items:center}
-    .tag{background:#1b2a41;color:#bfe1ff;border-radius:12px;padding:6px 10px;font-size:12px}
-    .btn{background:#12243a;border:1px solid #28415e;color:#cfe8ff;border-radius:12px;padding:10px 14px;cursor:pointer}
-    .card{background:var(--card);border:1px solid #1f3147;border-radius:16px;padding:16px;margin-top:14px}
-    pre{white-space:pre-wrap;word-break:break-word;color:#9ac3ff}
+    body{background:#0F172A;color:#E5E7EB;font-family:system-ui,-apple-system,Segoe UI,Roboto}
+    .wrap{max-width:960px;margin:24px auto;padding:16px}
+    .card{background:#111827;border:1px solid #1F2937;border-radius:14px;padding:16px}
+    .ok{background:#064e3b;color:#d1fae5;border-radius:10px;padding:10px 12px;margin-bottom:12px;display:none}
+    .warn{background:#3f1d1d;color:#fecaca;border-radius:10px;padding:10px 12px;margin-bottom:12px;display:none}
+    #cw-root{min-height:220px;display:flex;align-items:center;justify-content:center;border:1px dashed #334155;border-radius:12px;margin-top:12px}
+    .btn{background:#0ea5e9;color:#002233;border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="bar">
-      <button class="btn" onclick="location.reload()">تحديث</button>
-      <span class="tag" id="ver">mgcw_step0</span>
-      <h1 style="margin:0 0 0 8px;font-size:20px">MindGrid 🧠</h1>
-    </div>
+    <h1>🧠 MindGrid <small id="tag" style="font-size:14px;opacity:.8">mgcw_fixA</small></h1>
+
+    <div id="msgOk" class="ok">تم تحميل السكربتات بنجاح. سنبدأ الآن…</div>
+    <div id="msgWarn" class="warn"></div>
 
     <div class="card">
-      <div id="status">سيتم تحميل الواجهة… إذا طال الانتظار تأكّد من وجود الملفات التالية:</div>
-      <pre>js/core.js
-js/ui.js
-js/library.js
-js/crossword_canvas.js</pre>
+      <p style="margin:0 0 8px">منطقة اللعب:</p>
+      <div id="cw-root">…سيتم التهيئة…</div>
+      <div style="margin-top:12px"><button class="btn" id="btnStart">ابدأ يدويًا</button></div>
     </div>
-
-    <div id="app" class="card" style="min-height:260px;margin-top:10px;display:none"></div>
   </div>
 
+  <!-- تحميل السكربتات بالترتيب الصحيح — بدون type="module" -->
+  <script src="js/library.js?v=mgcw_fixA" defer></script>
+  <script src="js/core.js?v=mgcw_fixA" defer></script>
+  <script src="js/ui.js?v=mgcw_fixA" defer></script>
+  <script src="js/crossword_canvas.js?v=mgcw_fixA" defer></script>
+
+  <!-- فحص سريع + تشغيل -->
   <script>
-    // كسر الكاش: نأخذ cb من الرابط أو نولّد واحداً
-    const url = new URL(location.href);
-    const cb  = url.searchParams.get('cb') || String(Date.now());
-    const ver = url.searchParams.get('v')  || 'mgcw_step0';
-    document.getElementById('ver').textContent = ver;
+    const ok = s => { const el = document.getElementById('msgOk'); el.style.display='block'; if(s) el.textContent = s; };
+    const warn = s => { const el = document.getElementById('msgWarn'); el.style.display='block'; el.textContent = s; };
 
-    // تحميل السكربتات ديناميكيًا مع cb
-    const scripts = [
-      'js/core.js',
-      'js/ui.js',
-      'js/library.js',
-      'js/crossword_canvas.js'
-    ];
-    function loadScripts(list){
-      return list.reduce((p,src)=>p.then(()=>new Promise((res,rej)=>{
-        const s=document.createElement('script');
-        s.src = src + '?v=' + encodeURIComponent(ver) + '&cb=' + encodeURIComponent(cb);
-        s.defer = true;
-        s.onload = res;
-        s.onerror = ()=>rej(new Error('فشل تحميل: '+src));
-        document.head.appendChild(s);
-      })), Promise.resolve());
-    }
-
-    // بعد تحميل السكربتات نشغّل الواجهة
-    loadScripts(scripts).then(()=>{
-      if (window.MG && typeof MG.initUI==='function'){
-        document.getElementById('status').textContent = 'تم التحميل ✓';
-        document.getElementById('app').style.display='block';
-        // ابدأ واجهة الكلمات المتقاطعة (canvas)
-        if (typeof MG.startCrosswordCanvas==='function'){
-          MG.startCrosswordCanvas({
-            mount:'#app',
-            packUrl:'content/crossword/packs/starter.json?cb='+cb
-          });
+    window.addEventListener('DOMContentLoaded', () => {
+      const tryStart = () => {
+        if (!window.MG) { warn('MG غير معرّف. تأكّد أن library.js يُحمَّل أولاً وبدون type="module".'); return; }
+        if (typeof window.startCrosswordCanvas !== 'function') {
+          warn('الدالة startCrosswordCanvas غير موجودة. تأكّد من js/crossword_canvas.js واسمه بشرطة سفلية.');
+          return;
         }
-      } else {
-        document.getElementById('status').textContent =
-          'السكربتات حُمّلت، لكن MG غير معرّف — تأكّد أن library.js يعرّف MG و startCrosswordCanvas.';
-      }
-    }).catch(err=>{
-      document.getElementById('status').textContent = 'خطأ تحميل: ' + err.message;
-      console.error(err);
+        ok('تم التحميل — نبدأ اللعبة الآن.');
+        try { window.startCrosswordCanvas({ mount:'#cw-root' }); }
+        catch(e){ warn('استثناء أثناء البدء: ' + e.message); console.error(e); }
+      };
+
+      // زر تشغيل يدوي للمساعدة في التشخيص
+      document.getElementById('btnStart').addEventListener('click', tryStart);
+
+      // تشغيل تلقائي بعد لحظات كي تضمن تحميل كل defer
+      setTimeout(tryStart, 50);
     });
   </script>
 </body>
