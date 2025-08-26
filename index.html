@@ -2,80 +2,84 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>MindGrid – الكلمات المتقاطعة</title>
-
-  <!-- الأسلوب العام -->
-  <link rel="stylesheet" href="styles.css?v=mgcw_step0" />
-
-  <!-- أيقونة بسيطة (اختياري) -->
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23f59e0b'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' font-size='28' font-family='Arial' fill='white'%3E%C3%97%3C/text%3E%3C/svg%3E" />
-
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <title>MindGrid • الكلمات المتقاطعة</title>
+  <meta name="theme-color" content="#0d1b2a" />
   <style>
-    /* لمسة سريعة لتأكد أن الصفحة تبدو مرتبة حتى قبل تحميل السكربتات */
-    body{margin:0;background:#0f172a;color:#e2e8f0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue","Noto Sans Arabic",Arial}
-    .shell{min-height:100svh;display:flex;flex-direction:column}
-    header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:linear-gradient(135deg,#1e293b,#111827);border-bottom:1px solid #1f2937}
-    .brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:20px}
-    .tag{font-size:12px;padding:.2rem .5rem;border-radius:999px;background:#0ea5e9;color:#001b2a}
-    .actions{display:flex;gap:8px}
-    .btn{background:#0ea5e9;border:none;color:#001b2a;padding:.55rem .85rem;border-radius:10px;font-weight:700}
-    .btn.secondary{background:#334155;color:#e2e8f0}
-    main{flex:1;padding:18px}
-    #app{max-width:1100px;margin-inline:auto;background:#0b1220;border:1px solid #1f2937;border-radius:16px;padding:16px}
-    .placeholder{opacity:.8;font-size:15px}
+    :root{--bg:#0e1624;--card:#132033;--text:#e6eef8;--muted:#8aa0b5;--accent:#57c5ff}
+    html,body{height:100%} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans Arabic",Tahoma}
+    .wrap{max-width:940px;margin:0 auto;padding:18px}
+    .bar{display:flex;gap:8px;align-items:center}
+    .tag{background:#1b2a41;color:#bfe1ff;border-radius:12px;padding:6px 10px;font-size:12px}
+    .btn{background:#12243a;border:1px solid #28415e;color:#cfe8ff;border-radius:12px;padding:10px 14px;cursor:pointer}
+    .card{background:var(--card);border:1px solid #1f3147;border-radius:16px;padding:16px;margin-top:14px}
+    pre{white-space:pre-wrap;word-break:break-word;color:#9ac3ff}
   </style>
 </head>
-
 <body>
-  <div class="shell">
-    <header>
-      <div class="brand">
-        <span aria-hidden="true">🧠</span>
-        <span>MindGrid</span>
-        <span class="tag" id="buildTag">mgcw_step0</span>
-      </div>
-      <div class="actions">
-        <button class="btn secondary" id="refreshBtn">تحديث</button>
-        <a class="btn" href="#" id="backBtn">رجوع</a>
-      </div>
-    </header>
+  <div class="wrap">
+    <div class="bar">
+      <button class="btn" onclick="location.reload()">تحديث</button>
+      <span class="tag" id="ver">mgcw_step0</span>
+      <h1 style="margin:0 0 0 8px;font-size:20px">MindGrid 🧠</h1>
+    </div>
 
-    <main>
-      <div id="app">
-        <div class="placeholder">
-          سيتم تحميل الواجهة… إذا طال الانتظار تأكد من مسارات السكربتات: <code>js/core.js</code>,
-          <code>js/ui.js</code>, <code>js/library.js</code>, <code>js/crossword_canvas.js</code>.
-        </div>
-      </div>
-    </main>
+    <div class="card">
+      <div id="status">سيتم تحميل الواجهة… إذا طال الانتظار تأكّد من وجود الملفات التالية:</div>
+      <pre>js/core.js
+js/ui.js
+js/library.js
+js/crossword_canvas.js</pre>
+    </div>
+
+    <div id="app" class="card" style="min-height:260px;margin-top:10px;display:none"></div>
   </div>
 
-  <!-- تحميل السكربتات من مجلد js (مع كسر كاش بسيط) -->
-  <script defer src="js/core.js?v=mgcw_step0"></script>
-  <script defer src="js/ui.js?v=mgcw_step0"></script>
-  <script defer src="js/library.js?v=mgcw_step0"></script>
-  <script defer src="js/crossword_canvas.js?v=mgcw_step0"></script>
-
-  <!-- أدوات بسيطة: تحديث مع cb=timestamp و زر رجوع -->
   <script>
-    (function () {
-      const refreshBtn = document.getElementById('refreshBtn');
-      const backBtn = document.getElementById('backBtn');
+    // كسر الكاش: نأخذ cb من الرابط أو نولّد واحداً
+    const url = new URL(location.href);
+    const cb  = url.searchParams.get('cb') || String(Date.now());
+    const ver = url.searchParams.get('v')  || 'mgcw_step0';
+    document.getElementById('ver').textContent = ver;
 
-      refreshBtn?.addEventListener('click', () => {
-        const url = new URL(location.href);
-        url.searchParams.set('cb', Date.now().toString());
-        location.replace(url.toString());
-      });
+    // تحميل السكربتات ديناميكيًا مع cb
+    const scripts = [
+      'js/core.js',
+      'js/ui.js',
+      'js/library.js',
+      'js/crossword_canvas.js'
+    ];
+    function loadScripts(list){
+      return list.reduce((p,src)=>p.then(()=>new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src = src + '?v=' + encodeURIComponent(ver) + '&cb=' + encodeURIComponent(cb);
+        s.defer = true;
+        s.onload = res;
+        s.onerror = ()=>rej(new Error('فشل تحميل: '+src));
+        document.head.appendChild(s);
+      })), Promise.resolve());
+    }
 
-      backBtn?.addEventListener('click', (e) => {
-        e.preventDefault();
-        history.length > 1 ? history.back() : location.assign('/');
-      });
-    })();
+    // بعد تحميل السكربتات نشغّل الواجهة
+    loadScripts(scripts).then(()=>{
+      if (window.MG && typeof MG.initUI==='function'){
+        document.getElementById('status').textContent = 'تم التحميل ✓';
+        document.getElementById('app').style.display='block';
+        // ابدأ واجهة الكلمات المتقاطعة (canvas)
+        if (typeof MG.startCrosswordCanvas==='function'){
+          MG.startCrosswordCanvas({
+            mount:'#app',
+            packUrl:'content/crossword/packs/starter.json?cb='+cb
+          });
+        }
+      } else {
+        document.getElementById('status').textContent =
+          'السكربتات حُمّلت، لكن MG غير معرّف — تأكّد أن library.js يعرّف MG و startCrosswordCanvas.';
+      }
+    }).catch(err=>{
+      document.getElementById('status').textContent = 'خطأ تحميل: ' + err.message;
+      console.error(err);
+    });
   </script>
-
-  <noscript>يجب تفعيل الجافاسكربت لتعمل اللعبة.</noscript>
 </body>
 </html>
