@@ -1,67 +1,81 @@
 <!doctype html>
-<html lang="ar" dir="rtl" data-theme="light">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MindGrid • البداية</title>
-  <link rel="stylesheet" href="styles.css?v=uiGlow2">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>MindGrid – الكلمات المتقاطعة</title>
+
+  <!-- الأسلوب العام -->
+  <link rel="stylesheet" href="styles.css?v=mgcw_step0" />
+
+  <!-- أيقونة بسيطة (اختياري) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23f59e0b'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' font-size='28' font-family='Arial' fill='white'%3E%C3%97%3C/text%3E%3C/svg%3E" />
+
+  <style>
+    /* لمسة سريعة لتأكد أن الصفحة تبدو مرتبة حتى قبل تحميل السكربتات */
+    body{margin:0;background:#0f172a;color:#e2e8f0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue","Noto Sans Arabic",Arial}
+    .shell{min-height:100svh;display:flex;flex-direction:column}
+    header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:linear-gradient(135deg,#1e293b,#111827);border-bottom:1px solid #1f2937}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:20px}
+    .tag{font-size:12px;padding:.2rem .5rem;border-radius:999px;background:#0ea5e9;color:#001b2a}
+    .actions{display:flex;gap:8px}
+    .btn{background:#0ea5e9;border:none;color:#001b2a;padding:.55rem .85rem;border-radius:10px;font-weight:700}
+    .btn.secondary{background:#334155;color:#e2e8f0}
+    main{flex:1;padding:18px}
+    #app{max-width:1100px;margin-inline:auto;background:#0b1220;border:1px solid #1f2937;border-radius:16px;padding:16px}
+    .placeholder{opacity:.8;font-size:15px}
+  </style>
 </head>
+
 <body>
-  <header class="mg-header">
-    <div class="brand">
-      <span class="logo">🧠</span>
-      <span class="name">MindGrid</span>
-    </div>
-    <button id="themeToggle" class="ghost" type="button" aria-label="تبديل النمط">🌓</button>
-  </header>
+  <div class="shell">
+    <header>
+      <div class="brand">
+        <span aria-hidden="true">🧠</span>
+        <span>MindGrid</span>
+        <span class="tag" id="buildTag">mgcw_step0</span>
+      </div>
+      <div class="actions">
+        <button class="btn secondary" id="refreshBtn">تحديث</button>
+        <a class="btn" href="#" id="backBtn">رجوع</a>
+      </div>
+    </header>
 
-  <main class="wrap">
-    <section class="card glass">
-      <div class="hero-icon">🧠</div>
-      <h1 class="title">الكلمات المتقاطعة</h1>
-      <p class="subtitle">تحدَّ عقلك مع ألغاز يومية جديدة</p>
+    <main>
+      <div id="app">
+        <div class="placeholder">
+          سيتم تحميل الواجهة… إذا طال الانتظار تأكد من مسارات السكربتات: <code>js/core.js</code>,
+          <code>js/ui.js</code>, <code>js/library.js</code>, <code>js/crossword_canvas.js</code>.
+        </div>
+      </div>
+    </main>
+  </div>
 
-      <form id="startForm" class="form">
-        <label class="field">
-          <span>اسم المستخدم</span>
-          <input id="name" type="text" placeholder="اكتب اسمك" maxlength="20" autocomplete="name" required />
-        </label>
+  <!-- تحميل السكربتات من مجلد js (مع كسر كاش بسيط) -->
+  <script defer src="js/core.js?v=mgcw_step0"></script>
+  <script defer src="js/ui.js?v=mgcw_step0"></script>
+  <script defer src="js/library.js?v=mgcw_step0"></script>
+  <script defer src="js/crossword_canvas.js?v=mgcw_step0"></script>
 
-        <label class="field">
-          <span>الدولة</span>
-          <select id="country" dir="rtl">
-            <option value="" selected disabled>— اختر الدولة —</option>
-          </select>
-          <small class="hint">سيتم ملء القائمة تلقائيًا، مع دعم قائمة افتراضية عند تعذر التحميل.</small>
-        </label>
+  <!-- أدوات بسيطة: تحديث مع cb=timestamp و زر رجوع -->
+  <script>
+    (function () {
+      const refreshBtn = document.getElementById('refreshBtn');
+      const backBtn = document.getElementById('backBtn');
 
-        <fieldset class="difficulty">
-          <legend>مستوى الصعوبة</legend>
-          <div class="chips">
-            <input type="radio" name="diff" id="diff-easy" value="easy" />
-            <label for="diff-easy" class="chip"><span>⭐️ سهل</span></label>
+      refreshBtn?.addEventListener('click', () => {
+        const url = new URL(location.href);
+        url.searchParams.set('cb', Date.now().toString());
+        location.replace(url.toString());
+      });
 
-            <input type="radio" name="diff" id="diff-med" value="medium" checked />
-            <label for="diff-med" class="chip"><span>⚡️ متوسط</span></label>
+      backBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        history.length > 1 ? history.back() : location.assign('/');
+      });
+    })();
+  </script>
 
-            <input type="radio" name="diff" id="diff-hard" value="hard" />
-            <label for="diff-hard" class="chip danger"><span>🏆 صعب</span></label>
-          </div>
-        </fieldset>
-
-        <button id="startBtn" class="cta" type="submit">ابدأ اللعبة</button>
-      </form>
-    </section>
-  </main>
-
-  <footer class="foot">
-    <button id="refreshBtn" class="link" type="button">تحديث</button>
-    <span class="ver">v uiGlow2</span>
-  </footer>
-
-  <script src="ui.js?v=uiGlow2"></script>
+  <noscript>يجب تفعيل الجافاسكربت لتعمل اللعبة.</noscript>
 </body>
 </html>
