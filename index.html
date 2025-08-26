@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MindGrid • البداية</title>
+  <link rel="stylesheet" href="styles.css?v=uiGlow2">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="mg-header">
+    <div class="brand">
+      <span class="logo">🧠</span>
+      <span class="name">MindGrid</span>
+    </div>
+    <button id="themeToggle" class="ghost" type="button" aria-label="تبديل النمط">🌓</button>
+  </header>
+
+  <main class="wrap">
+    <section class="card glass">
+      <div class="hero-icon">🧠</div>
+      <h1 class="title">الكلمات المتقاطعة</h1>
+      <p class="subtitle">تحدَّ عقلك مع ألغاز يومية جديدة</p>
+
+      <form id="startForm" class="form">
+        <label class="field">
+          <span>اسم المستخدم</span>
+          <input id="name" type="text" placeholder="اكتب اسمك" maxlength="20" autocomplete="name" required />
+        </label>
+
+        <label class="field">
+          <span>الدولة</span>
+          <select id="country" dir="rtl">
+            <option value="" selected disabled>— اختر الدولة —</option>
+          </select>
+          <small class="hint">سيتم ملء القائمة تلقائيًا، مع دعم قائمة افتراضية عند تعذر التحميل.</small>
+        </label>
+
+        <fieldset class="difficulty">
+          <legend>مستوى الصعوبة</legend>
+          <div class="chips">
+            <input type="radio" name="diff" id="diff-easy" value="easy" />
+            <label for="diff-easy" class="chip"><span>⭐️ سهل</span></label>
+
+            <input type="radio" name="diff" id="diff-med" value="medium" checked />
+            <label for="diff-med" class="chip"><span>⚡️ متوسط</span></label>
+
+            <input type="radio" name="diff" id="diff-hard" value="hard" />
+            <label for="diff-hard" class="chip danger"><span>🏆 صعب</span></label>
+          </div>
+        </fieldset>
+
+        <button id="startBtn" class="cta" type="submit">ابدأ اللعبة</button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <button id="refreshBtn" class="link" type="button">تحديث</button>
+    <span class="ver">v uiGlow2</span>
+  </footer>
+
+  <script src="ui.js?v=uiGlow2"></script>
+</body>
+</html>
